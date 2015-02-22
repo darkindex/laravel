@@ -17,7 +17,7 @@
 
 Controllers are classes that are responsible for accepting user input and managing interactions between models, libraries, and views. Typically, they will ask a model for data, and then return a view that presents that data to the user.
 
-The usage of controllers is the most common method of implementing application logic in modern web-development. However, Laravel also empowers developers to implement their application logic within routing declarations. This is explored in detail in the [routing document](/docs/routing). New users are encourage to start with controllers. There is nothing that route-based application logic can do that controllers can't.
+The usage of controllers is the most common method of implementing application logic in modern web-development. However, Laravel also empowers developers to implement their application logic within routing declarations. This is explored in detail in the [routing document](/docs/routing). New users are encouraged to start with controllers. There is nothing that route-based application logic can do that controllers can't.
 
 Controller classes should be stored in **application/controllers** and should extend the Base\_Controller class. A Home\_Controller class is included with Laravel.
 
@@ -49,7 +49,7 @@ Check [the routing page](/docs/routing#controller-routing) for more information 
 <a name="bundle-controllers"></a>
 ## Bundle Controllers
 
-Bundles are Laravel's modular package system. Bundles can easily configured to handle requests to your application. We'll be going over [bundles in more detail](/docs/bundles) in another document.
+Bundles are Laravel's modular package system. Bundles can be easily configured to handle requests to your application. We'll be going over [bundles in more detail](/docs/bundles) in another document.
 
 Creating controllers that belong to bundles is almost identical to creating your application controllers. Just prefix the controller class name with the name of the bundle, so if your bundle is named "admin", your controller classes would look like this:
 
@@ -98,7 +98,7 @@ In this example the auth filter will be run before the action_index() or action_
 
 	$this->filter('before', 'auth')->except(array('add', 'posts'));
 
-Much like the previous example, this declaration ensures that the auth filter is run on only some of this controller's actions.  Instead of declaring to which actions the filter applies we are instead declaring the actions that will not require authenticated sessions.  It can sometimes be safer to use the 'except' method as it's possible to add new actions to this controller and to forget to add them to only().  This could potentially lead your controller's action being unintentionally accessible by users who haven't been authenticated.
+Much like the previous example, this declaration ensures that the auth filter is run on only some of this controller's actions.  Instead of declaring to which actions the filter applies we are instead declaring the actions that will not require authenticated sessions.  It can sometimes be safer to use the 'except' method as it's possible to add new actions to this controller and to forget to add them to only().  This could potentially lead to your controller's action being unintentionally accessible by users who haven't been authenticated.
 
 #### Attaching a filter to run on POST:
 
@@ -140,7 +140,7 @@ Define the controller class and store it in **controllers/admin/panel.php**.
 <a name="controller-layouts"></a>
 ## Controller Layouts
 
-Full documentation on using layouts with Controllers [can be found on the Templating page](http://laravel.com/docs/views/templating).
+Full documentation on using layouts with Controllers [can be found on the Templating page](/docs/views/templating).
 
 <a name="restful-controllers"></a>
 ## RESTful Controllers

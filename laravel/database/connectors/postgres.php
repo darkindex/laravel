@@ -24,7 +24,9 @@ class Postgres extends Connector {
 	{
 		extract($config);
 
-		$dsn = "pgsql:host={$host};dbname={$database}";
+		$host_dsn = isset($host) ? 'host='.$host.';' : '';
+
+		$dsn = "pgsql:{$host_dsn}dbname={$database}";
 
 		// The developer has the freedom of specifying a port for the PostgresSQL
 		// database or the default port (5432) will be used by PDO to create the
@@ -42,6 +44,13 @@ class Postgres extends Connector {
 		if (isset($config['charset']))
 		{
 			$connection->prepare("SET NAMES '{$config['charset']}'")->execute();
+		}
+
+		// If a schema has been specified, we'll execute a query against
+		// the database to set the search path.
+		if (isset($config['schema']))
+		{
+			$connection->prepare("SET search_path TO {$config['schema']}")->execute();
 		}
 
 		return $connection;

@@ -20,7 +20,7 @@ class Form {
 	 * Registers a custom macro.
 	 *
 	 * @param  string   $name
-	 * @param  Closure  $input
+	 * @param  Closure  $macro
 	 * @return void
 	 */
 	public static function macro($name, $macro)
@@ -182,13 +182,15 @@ class Form {
 	 * @param  array   $attributes
 	 * @return string
 	 */
-	public static function label($name, $value, $attributes = array())
+	public static function label($name, $value, $attributes = array(), $escape_html = true)
 	{
 		static::$labels[] = $name;
 
 		$attributes = HTML::attributes($attributes);
 
-		$value = HTML::entities($value);
+		if ($escape_html) {
+			$value = HTML::entities($value);
+		}
 
 		return '<label for="'.$name.'"'.$attributes.'>'.$value.'</label>';
 	}
@@ -427,7 +429,7 @@ class Form {
 			$html[] = static::option($value, $display, $selected);
 		}
 
-		return '<optgroup label="'.HTML::entities($label).'">'.implode('', $html).'</option>';
+		return '<optgroup label="'.HTML::entities($label).'">'.implode('', $html).'</optgroup>';
 	}
 
 	/**
@@ -526,7 +528,7 @@ class Form {
 	 * @param  array   $attributes
 	 * @return string
 	 */
-	public static function submit($value, $attributes = array())
+	public static function submit($value = null, $attributes = array())
 	{
 		return static::input('submit', null, $value, $attributes);
 	}
@@ -538,7 +540,7 @@ class Form {
 	 * @param  array   $attributes
 	 * @return string
 	 */
-	public static function reset($value, $attributes = array())
+	public static function reset($value = null, $attributes = array())
 	{
 		return static::input('reset', null, $value, $attributes);
 	}
@@ -570,7 +572,7 @@ class Form {
 	 * @param  array   $attributes
 	 * @return string
 	 */
-	public static function button($value, $attributes = array())
+	public static function button($value = null, $attributes = array())
 	{
 		return '<button'.HTML::attributes($attributes).'>'.HTML::entities($value).'</button>';
 	}

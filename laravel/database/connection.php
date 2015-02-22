@@ -21,7 +21,7 @@ class Connection {
 	/**
 	 * The query grammar instance for the connection.
 	 *
-	 * @var Grammars\Grammar
+	 * @var Query\Grammars\Grammar
 	 */
 	protected $grammar;
 
@@ -75,7 +75,8 @@ class Connection {
 
 		if (isset(\Laravel\Database::$registrar[$this->driver()]))
 		{
-			\Laravel\Database::$registrar[$this->driver()]['query']();
+			$resolver = \Laravel\Database::$registrar[$this->driver()]['query'];
+			return $this->grammar = $resolver($this);
 		}
 
 		switch ($this->driver())
@@ -101,7 +102,7 @@ class Connection {
 	 * Execute a callback wrapped in a database transaction.
 	 *
 	 * @param  callback  $callback
-	 * @return void
+	 * @return bool
 	 */
 	public function transaction($callback)
 	{
@@ -121,7 +122,7 @@ class Connection {
 			throw $e;
 		}
 
-		$this->pdo->commit();
+		return $this->pdo->commit();
 	}
 
 	/**
@@ -185,7 +186,7 @@ class Connection {
 		// The result we return depends on the type of query executed against the
 		// database. On SELECT clauses, we will return the result set, for update
 		// and deletes we will return the affected row count.
-		if (stripos($sql, 'select') === 0)
+		if (stripos($sql, 'select') === 0 || stripos($sql, 'show') === 0)
 		{
 			return $this->fetch($statement, Config::get('database.fetch'));
 		}
@@ -196,7 +197,7 @@ class Connection {
 		// For insert statements that use the "returning" clause, which is allowed
 		// by database systems such as Postgres, we need to actually return the
 		// real query result so the consumer can get the ID.
-		elseif (stripos($sql, 'insert') === 0 and stripos($sql, 'returning') !== false)
+		elseif (stripos($sql, 'insert') === 0 and stripos($sql, ') returning') !== false)
 		{
 			return $this->fetch($statement, Config::get('database.fetch'));
 		}
@@ -209,7 +210,7 @@ class Connection {
 	/**
 	 * Execute a SQL query against the connection.
 	 *
-	 * The PDO statement and boolean result will be return in an array.
+	 * The PDO statement and boolean result will be returned in an array.
 	 *
 	 * @param  string  $sql
 	 * @param  array   $bindings
@@ -265,7 +266,7 @@ class Connection {
 			throw $exception;
 		}
 
-		// Once we have execute the query, we log the SQL, bindings, and
+		// Once we have executed the query, we log the SQL, bindings, and
 		// execution time in a static array that is accessed by all of
 		// the connections actively being used by the application.
 		if (Config::get('database.profile'))
@@ -287,7 +288,7 @@ class Connection {
 	{
 		// If the fetch style is "class", we'll hydrate an array of PHP
 		// stdClass objects as generic containers for the query rows,
-		// otherwise we'll just use the fetch styel value.
+		// otherwise we'll just use the fetch style value.
 		if ($style === PDO::FETCH_CLASS)
 		{
 			return $statement->fetchAll(PDO::FETCH_CLASS, 'stdClass');
@@ -308,7 +309,7 @@ class Connection {
 	 */
 	protected function log($sql, $bindings, $start)
 	{
-		$time = number_format((microtime(true) - $start) * 1000, 2);
+		$time = (microtime(true) - $start) * 1000;
 
 		Event::fire('laravel.query', array($sql, $bindings, $time));
 

@@ -1,5 +1,6 @@
 <?php namespace Laravel;
 
+use Closure;
 use Laravel\Database\Expression;
 use Laravel\Database\Connection;
 
@@ -122,6 +123,19 @@ class Database {
 	public static function raw($value)
 	{
 		return new Expression($value);
+	}
+	
+	/**
+	 * Escape a string for usage in a query.
+	 *
+	 * This uses the correct quoting mechanism for the default database connection.
+	 *
+	 * @param  string      $value
+	 * @return string
+	 */
+	public static function escape($value)
+	{
+		return static::connection()->pdo->quote($value);
 	}
 
 	/**

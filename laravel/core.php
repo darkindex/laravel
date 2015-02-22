@@ -19,6 +19,20 @@ define('MB_STRING', (int) function_exists('mb_get_info'));
 
 /*
 |--------------------------------------------------------------------------
+| Start Output Buffering
+|--------------------------------------------------------------------------
+|
+| Output buffering allows us to capture all output at any time, so that we
+| can discard it or treat it accordingly. An example of this is if you have
+| echoed a string, but want to return a Redirect object. Because Symfony
+| only checks if headers have been sent, your redirect just silently fails.
+|
+*/
+
+ob_start('mb_output_handler');
+
+/*
+|--------------------------------------------------------------------------
 | Require Core Classes
 |--------------------------------------------------------------------------
 |
@@ -140,14 +154,18 @@ if (magic_quotes())
 
 use Symfony\Component\HttpFoundation\LaravelRequest as RequestFoundation;
 
+RequestFoundation::enableHttpMethodParameterOverride();
+
 Request::$foundation = RequestFoundation::createFromGlobals();
+
+
 
 /*
 |--------------------------------------------------------------------------
 | Determine The Application Environment
 |--------------------------------------------------------------------------
 |
-| Next we're ready to determine the application environment. This may be
+| Next, we're ready to determine the application environment. This may be
 | set either via the command line options or via the mapping of URIs to
 | environments that lives in the "paths.php" file for the application
 | and is parsed. When determining the CLI environment, the "--env"
@@ -157,9 +175,9 @@ Request::$foundation = RequestFoundation::createFromGlobals();
 
 if (Request::cli())
 {
-	$environment = get_cli_option('env');
+	$environment = get_cli_option('env', getenv('LARAVEL_ENV'));
 
-	if ( ! isset($environment))
+	if (empty($environment))
 	{
 		$environment = Request::detect_env($environments, gethostname());
 	}
@@ -178,7 +196,7 @@ else
 |
 | Once we have determined the application environment, we will set it on
 | the global server array of the HttpFoundation request. This makes it
-| available throughout the application, thought it is mainly only
+| available throughout the application, though it is mainly only
 | used to determine which configuration files to merge in.
 |
 */
@@ -199,7 +217,7 @@ if (isset($environment))
 |
 */
 
-if (defined('STDIN'))
+if (Request::cli())
 {
 	$console = CLI\Command::options($_SERVER['argv']);
 
@@ -216,7 +234,7 @@ if (defined('STDIN'))
 |--------------------------------------------------------------------------
 |
 | Finally we will register all of the bundles that have been defined for
-| the application. None of them will be started yet, but will be setup
+| the application. None of them will be started yet, but will be set up
 | so that they may be started by the developer at any time.
 |
 */

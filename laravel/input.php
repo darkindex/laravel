@@ -40,6 +40,8 @@ class Input {
 	 */
 	public static function has($key)
 	{
+		if (is_array(static::get($key))) return true;
+
 		return trim((string) static::get($key)) !== '';
 	}
 
@@ -102,13 +104,14 @@ class Input {
 	/**
 	 * Get the JSON payload for the request.
 	 *
+	 * @param  bool    $as_array
 	 * @return object
 	 */
-	public static function json()
+	public static function json($as_array = false)
 	{
 		if ( ! is_null(static::$json)) return static::$json;
 
-		return static::$json = json_decode(Request::foundation()->getContent());
+		return static::$json = json_decode(Request::foundation()->getContent(), $as_array);
 	}
 
 	/**
@@ -157,6 +160,8 @@ class Input {
 	 */
 	public static function had($key)
 	{
+		if (is_array(static::old($key))) return true;
+
 		return trim((string) static::old($key)) !== '';
 	}
 
@@ -221,7 +226,7 @@ class Input {
 	 * @param  string  $key
 	 * @param  string  $directory
 	 * @param  string  $name
-	 * @return bool
+	 * @return Symfony\Component\HttpFoundation\File\File
 	 */
 	public static function upload($key, $directory, $name = null)
 	{
@@ -285,6 +290,15 @@ class Input {
 	public static function replace(array $input)
 	{
 		Request::foundation()->request->replace($input);
+	}
+
+	/**
+	 * Clear the input for the current request.
+	 * @return void
+	 */
+	public static function clear()
+	{
+		Request::foundation()->request->replace(array());
 	}
 
 }

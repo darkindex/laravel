@@ -40,6 +40,25 @@ class Table {
 	public $commands = array();
 
 	/**
+	 * The registered custom macros.
+	 *
+	 * @var array
+	 */
+	public static $macros = array();
+
+	/**
+	 * Registers a custom macro.
+	 *
+	 * @param  string   $name
+	 * @param  Closure  $macro
+	 * @return void
+	 */
+	public static function macro($name, $macro)
+	{
+		static::$macros[$name] = $macro;
+	}
+
+	/**
 	 * Create a new schema table instance.
 	 *
 	 * @param  string  $name
@@ -113,6 +132,7 @@ class Table {
 	 *
 	 * @param  string|array  $columns
 	 * @param  string        $name
+	 * @return Fluent
 	 */
 	public function foreign($columns, $name = null)
 	{
@@ -142,6 +162,17 @@ class Table {
 		}
 
 		return $this->command($type, compact('name', 'columns'));
+	}
+
+	/**
+	 * Rename the database table.
+	 *
+	 * @param  string  $name
+	 * @return Fluent
+	 */
+	public function rename($name)
+	{
+		return $this->command(__FUNCTION__, compact('name'));
 	}
 
 	/**
@@ -393,9 +424,7 @@ class Table {
 	{
 		$parameters = array_merge(compact('type'), $parameters);
 
-		$this->commands[] = new Fluent($parameters);
-
-		return end($this->commands);
+		return $this->commands[] = new Fluent($parameters);
 	}
 
 	/**
@@ -409,9 +438,25 @@ class Table {
 	{
 		$parameters = array_merge(compact('type'), $parameters);
 
-		$this->columns[] = new Fluent($parameters);
+		return $this->columns[] = new Fluent($parameters);
+	}
 
-		return end($this->columns);
+	/**
+	 * Dynamically handle calls to custom macros.
+	 *
+	 * @param  string  $method
+	 * @param  array   $parameters
+	 * @return mixed
+	 */
+	public function __call($method, $parameters)
+	{
+		if (isset(static::$macros[$method]))
+		{
+			array_unshift($parameters, $this);
+			return call_user_func_array(static::$macros[$method], $parameters);
+		}
+
+		throw new \Exception("Method [$method] does not exist.");
 	}
 
 }

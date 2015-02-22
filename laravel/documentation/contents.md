@@ -15,10 +15,11 @@
 	- [Filters](/docs/routing#filters)
 	- [Pattern Filters](/docs/routing#pattern-filters)
 	- [Global Filters](/docs/routing#global-filters)
-	- [Route Groups](/docs/routing#groups)
+	- [Route Groups](/docs/routing#route-groups)
 	- [Named Routes](/docs/routing#named-routes)
 	- [HTTPS Routes](/docs/routing#https-routes)
-	- [Bundle Routing](/docs/routing#bundle-routing)
+	- [Bundle Routes](/docs/routing#bundle-routes)
+	- [Controller Routing](/docs/routing#controller-routing)
 	- [CLI Route Testing](/docs/routing#cli-route-testing)
 - [Controllers](/docs/controllers)
 	- [The Basics](/docs/controllers#the-basics)
@@ -64,6 +65,7 @@
 	- [Upgrading Bundles](/docs/bundles#upgrading-bundles)
 - [Class Auto Loading](/docs/loading)
 - [Errors & Logging](/docs/logging)
+- [Profiler](/docs/profiler)
 - [Runtime Configuration](/docs/config)
 - [Examining Requests](/docs/requests)
 - [Generating URLs](/docs/urls)
@@ -109,3 +111,9 @@
 	- [Bundle Tasks](/docs/artisan/tasks#bundle-tasks)
 	- [CLI Options](/docs/artisan/tasks#cli-options)
 - [Commands](/docs/artisan/commands)
+
+### Contributing
+
+- [Laravel on GitHub](/docs/contrib/github)
+- [Command Line](/docs/contrib/command-line)
+- [TortoiseGit](/docs/contrib/tortoisegit)

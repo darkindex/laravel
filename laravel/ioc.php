@@ -31,6 +31,19 @@ class IoC {
 		static::$registry[$name] = compact('resolver', 'singleton');
 	}
 
+    /**
+     * Unregister an object
+     *
+     * @param string $name
+     */
+    public static function unregister($name)
+    {
+        if (array_key_exists($name, static::$registry)) {
+            unset(static::$registry[$name]);
+            unset(static::$singletons[$name]);
+        }
+    }
+
 	/**
 	 * Determine if an object has been registered in the container.
 	 *
@@ -39,7 +52,7 @@ class IoC {
 	 */
 	public static function registered($name)
 	{
-		return array_key_exists($name, static::$registry);
+		return array_key_exists($name, static::$registry) || array_key_exists($name, static::$singletons);
 	}
 
 	/**
@@ -85,6 +98,7 @@ class IoC {
 	 * </code>
 	 *
 	 * @param  string  $type
+	 * @param  array   $parameters
 	 * @return mixed
 	 */
 	public static function resolve($type, $parameters = array())
@@ -124,7 +138,7 @@ class IoC {
 		// If the requested type is registered as a singleton, we want to cache off
 		// the instance in memory so we can return it later without creating an
 		// entirely new instances of the object on each subsequent request.
-		if (isset(static::$registry[$type]['singleton']))
+		if (isset(static::$registry[$type]['singleton']) && static::$registry[$type]['singleton'] === true)
 		{
 			static::$singletons[$type] = $object;
 		}
@@ -140,6 +154,7 @@ class IoC {
 	 * @param  string  $type
 	 * @param  array   $parameters
 	 * @return mixed
+     * @throws \Exception
 	 */
 	protected static function build($type, $parameters = array())
 	{
@@ -154,11 +169,11 @@ class IoC {
 		$reflector = new \ReflectionClass($type);
 
 		// If the type is not instantiable, the developer is attempting to resolve
-		// an abstract type such as an Interface of Abstract Class and there is
+		// an abstract type such as an Interface of an Abstract Class and there is
 		// no binding registered for the abstraction so we need to bail out.
 		if ( ! $reflector->isInstantiable())
 		{
-			throw new Exception("Resolution target [$type] is not instantiable.");
+			throw new \Exception("Resolution target [$type] is not instantiable.");
 		}
 
 		$constructor = $reflector->getConstructor();
@@ -171,7 +186,7 @@ class IoC {
 			return new $type;
 		}
 
-		$dependencies = static::dependencies($constructor->getParameters());
+		$dependencies = static::dependencies($constructor->getParameters(), $parameters);
 
 		return $reflector->newInstanceArgs($dependencies);
 	}
@@ -179,10 +194,11 @@ class IoC {
 	/**
 	 * Resolve all of the dependencies from the ReflectionParameters.
 	 *
-	 * @param  array  $parameterrs
+	 * @param  array  $parameters
+	 * @param  array  $arguments that might have been passed into our resolve
 	 * @return array
 	 */
-	protected static function dependencies($parameters)
+	protected static function dependencies($parameters, $arguments)
 	{
 		$dependencies = array();
 
@@ -190,18 +206,44 @@ class IoC {
 		{
 			$dependency = $parameter->getClass();
 
-			// If the class is null, it means the dependency is a string or some other
-			// primitive type, which we can not esolve since it is not a class and
-			// we'll just bomb out with an error since we have nowhere to go.
-			if (is_null($dependency))
+			// If the person passed in some parameters to the class
+			// then we should probably use those instead of trying
+			// to resolve a new instance of the class
+			if (count($arguments) > 0)
 			{
-				throw new Exception("Unresolvable dependency resolving [$parameter].");
+				$dependencies[] = array_shift($arguments);
 			}
-
-			$dependencies[] = static::resolve($dependency->name);
+			else if (is_null($dependency))
+			{
+				$dependency[] = static::resolveNonClass($parameter);
+			}
+			else
+			{
+				$dependencies[] = static::resolve($dependency->name);
+			}
 		}
 
 		return (array) $dependencies;
+	}
+
+	/**
+	 * Resolves optional parameters for our dependency injection
+	 * pretty much took backport straight from L4's Illuminate\Container
+	 *
+	 * @param ReflectionParameter
+	 * @return default value
+     * @throws \Exception
+	 */
+	protected static function resolveNonClass($parameter)
+	{
+		if ($parameter->isDefaultValueAvailable())
+		{
+			return $parameter->getDefaultValue();
+		}
+		else
+		{
+			throw new \Exception("Unresolvable dependency resolving [$parameter].");
+		}
 	}
 
 }
