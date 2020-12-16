@@ -289,6 +289,10 @@ class URL {
 		// should be generated with an HTTPS protocol string or just HTTP.
 		$https = array_get(current($route), 'https', null);
 
+		if (!$https && Config::get('application.ssl')) {
+			$https = true;
+		}
+
 		$uri = trim(static::transpose(key($route), $parameters), '/');
 
 		return static::to($uri, $https);
